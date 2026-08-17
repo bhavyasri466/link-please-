@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LinkPlease Automation Engine — Live Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-brand">
+        <div class="logo-badge">LP</div>
+        <div>
+          <h1>LinkPlease Automation Engine</h1>
+          <p class="subtitle">Hostile Mock API Resilient Instagram Comment-to-DM Service</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="status-indicator" id="system-status">
+          <span class="status-dot online"></span>
+          <span id="status-text">Workers Active</span>
+        </div>
+        <button id="refresh-btn" class="btn btn-secondary">↻ Refresh</button>
+      </div>
+    </header>
+
+    <!-- Realtime Stats Counter Cards -->
+    <section class="stats-grid">
+      <div class="stat-card sent-card">
+        <div class="stat-label">Confirmed Sent (Delivered)</div>
+        <div class="stat-value" id="stat-sent">0</div>
+        <div class="stat-meta">Verified via /v1/dm reconciliation</div>
+      </div>
+      <div class="stat-card queued-card">
+        <div class="stat-label">Queued / Reconciling</div>
+        <div class="stat-value" id="stat-queued">0</div>
+        <div class="stat-meta">Rate limited (≤10/min) + In-Flight</div>
+      </div>
+      <div class="stat-card blocked-card">
+        <div class="stat-label">Duplicates Blocked</div>
+        <div class="stat-value" id="stat-duplicates">0</div>
+        <div class="stat-meta">Event retries & User-Rule deduplication</div>
+      </div>
+      <div class="stat-card failed-card">
+        <div class="stat-label">Permanent Failures</div>
+        <div class="stat-value" id="stat-failed">0</div>
+        <div class="stat-meta">Exceeded 5 retries / 400 Bad Requests</div>
+      </div>
+    </section>
+
+    <!-- Main Content Layout -->
+    <main class="content-grid">
+      <!-- Left Column: Rules & Simulation -->
+      <div class="col-left">
+        <!-- Rule Creation Card -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <h2>Add Automation Rule</h2>
+            <span class="badge">POST /rules</span>
+          </div>
+          <form id="rule-form" class="rule-form">
+            <div class="form-group">
+              <label for="rule-keyword">Keyword (Case-Insensitive)</label>
+              <input type="text" id="rule-keyword" placeholder="e.g. PRICE, LINK, CATALOG" required />
+            </div>
+            <div class="form-group">
+              <label for="rule-message">Direct Message (DM) Content</label>
+              <textarea id="rule-message" rows="3" placeholder="Here is the price list: https://example.com/prices" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" id="btn-save-rule">Create Rule</button>
+          </form>
+        </div>
+
+        <!-- Active Rules List -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <h2>Active Rules</h2>
+            <span class="counter" id="rules-count">0</span>
+          </div>
+          <div class="table-container">
+            <table class="data-table" id="rules-table">
+              <thead>
+                <tr>
+                  <th>Keyword</th>
+                  <th>DM Message</th>
+                  <th>Rule ID</th>
+                </tr>
+              </thead>
+              <tbody id="rules-tbody">
+                <tr><td colspan="3" class="empty-state">No rules registered yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Mock API Simulation Runner -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <h2>Simulation Runner</h2>
+            <span class="badge">POST /v1/simulate/start</span>
+          </div>
+          <div class="simulation-form">
+            <div class="form-group">
+              <label for="sim-url">Target Webhook URL</label>
+              <input type="url" id="sim-url" placeholder="https://your-domain.com/webhook" />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="sim-count">Count</label>
+                <input type="number" id="sim-count" value="500" />
+              </div>
+              <div class="form-group">
+                <label for="sim-duration">Duration (Seconds)</label>
+                <input type="number" id="sim-duration" value="10" />
+              </div>
+            </div>
+            <button class="btn btn-warning" id="btn-start-sim">Trigger 500-Event Burst</button>
+            <div id="sim-result" class="sim-result-box" style="display:none;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Live Job Stream -->
+      <div class="col-right">
+        <div class="panel-card full-height">
+          <div class="panel-header">
+            <h2>Live DM Queue & Outbound Log</h2>
+            <div class="pill-badge" id="jobs-count">0 jobs</div>
+          </div>
+          <div class="table-container flex-scroll">
+            <table class="data-table" id="jobs-table">
+              <thead>
+                <tr>
+                  <th>Status</th>
+                  <th>User ID</th>
+                  <th>Comment ID</th>
+                  <th>DM ID</th>
+                  <th>Retries</th>
+                  <th>Last Error / Note</th>
+                </tr>
+              </thead>
+              <tbody id="jobs-tbody">
+                <tr><td colspan="6" class="empty-state">No DM activity yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
